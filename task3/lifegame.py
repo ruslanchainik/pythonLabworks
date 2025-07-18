@@ -33,6 +33,9 @@ class GameOfLife:
                 if event.type == QUIT:
                     running = False
             self.draw_grid()
+            self.cell_list()
+            self.draw_cell_list(grid)
+            grid = self.update_cell_list(grid)
             pygame.display.flip()
             clock.tick(self.speed)
         pygame.quit()
@@ -51,6 +54,45 @@ class GameOfLife:
                 for _ in range(rows)]
 
         return grid
+    
+    def draw_cell_list(self, rects):
+        for row in range(self.cell_height):
+            for col in range(self.cell_width):
+                color = pygame.Color('green') if rects[row][col] else pygame.Color('white')
+                rect = (
+                    col * self.cell_size,
+                     row * self.cell_size,
+                    self.cell_size,
+                    self.cell_size
+                        )
+                pygame.draw.rect(self.screen, color, rect)
+
+    def get_neighbours(self, cell):
+        neighbours = []
+        row, col = cell[0], cell[1]
+        for i in range(3):
+            if 0 <= row - 1 + i < self.cell_height:
+                for k in range(3):
+                    if 0 <= col-1 + k < self.cell_width and ((i, k) != (1, 1)):
+                        neighbours.append((row - 1 + i, col-1 + k))
+
+        return neighbours
+    
+    def update_cell_list(self, cell_list):
+        rows = len(cell_list)
+        cols = len(cell_list[0])
+        new_matrix = [[0 for _ in range(cols)] for _ in range(rows)]
+        for i in range(len(cell_list)):
+            for k in range(len(cell_list[i])):
+                count = 0
+                sosedi = self.get_neighbours((i, k))
+                for z in range(len(sosedi)):
+                    if cell_list[sosedi[z][0]][sosedi[z][1]] == 1:
+                        count +=1
+                if (cell_list[i][k] == 1 and (count == 3 or count == 2)) or (cell_list[i][k] == 0 and (count == 3)):
+                    new_matrix[i][k] = 1
+
+        return new_matrix
 
 
 
